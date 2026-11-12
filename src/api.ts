@@ -4,9 +4,10 @@ import {
   type PublicKeyCredentialCreationOptionsJSON,
   type PublicKeyCredentialRequestOptionsJSON,
 } from "@simplewebauthn/browser";
-import type { AuthState, Dashboard, Passkey } from "../shared/types";
+import type { AuthState, Dashboard, Passkey, Prefs } from "../shared/types";
 
 const CACHE_KEY = "2hub:dashboard";
+const PREFS_KEY = "2hub:prefs";
 
 export class Unauthorized extends Error {}
 
@@ -34,12 +35,15 @@ export const api = {
   dashboard: (fresh = false) => call<Dashboard>(`/dashboard${fresh ? "?fresh=1" : ""}`),
   setDone: (id: number, done: boolean) => post(`/tasks/${id}/done`, { done }),
   createTask: (title: string) => post("/tasks", { title, today: true }),
+  prefs: () => call<Prefs>("/prefs"),
+  savePrefs: (prefs: Prefs) => call<Prefs>("/prefs", { method: "PUT", body: JSON.stringify(prefs) }),
   passkeys: () => call<Passkey[]>("/auth/passkeys"),
   deletePasskey: (id: string) => call(`/auth/passkeys/${encodeURIComponent(id)}`, { method: "DELETE" }),
   revokeOthers: () => post("/auth/sessions/revoke-others"),
   logout: async () => {
     await post("/auth/logout");
     localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(PREFS_KEY);
   },
 
   async login() {
@@ -70,5 +74,22 @@ export const dashboardCache = {
   },
   write(d: Dashboard) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(d));
+  },
+};
+
+export const prefsCache = {
+  read(): Prefs | null {
+    try {
+      const raw = localStorage.getItem(PREFS_KEY);
+      if (!raw) return null;
+      // Own blob written by `write` from a server-typed Prefs.
+      const cachedPrefs = JSON.parse(raw) as Prefs;
+      return cachedPrefs;
+    } catch {
+      return null;
+    }
+  },
+  write(p: Prefs) {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(p));
   },
 };

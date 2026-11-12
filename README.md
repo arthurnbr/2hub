@@ -1,6 +1,8 @@
 # 2hub
 
-PWA perso servie sur **hub.nobrega.fr** : lanceur d'apps plus widgets (tâches Vikunja, dépenses Sure, Gitea, état Coolify). L'interface s'affiche depuis le cache du service worker, sans réseau ; les widgets montrent d'abord le dernier état connu puis se mettent à jour.
+PWA perso servie sur **hub.nobrega.fr**. Une seule page, sans défilement sur ordinateur : une barre de raccourcis configurable, un tiroir avec toutes les apps, et quatre tuiles de résumé (tâches Vikunja, budget Sure, Gitea, infra Coolify). Cliquer sur une tuile ouvre son détail. L'interface s'affiche depuis le cache du service worker, sans réseau ; les données montrent d'abord le dernier état connu puis se mettent à jour.
+
+Style : Material 3 plat (surfaces tonales, sans ombres), police Roboto Flex, thème clair/sombre selon le système. Toutes les couleurs sont des variables définies en haut de `src/styles.css`.
 
 ## Architecture
 
@@ -12,6 +14,7 @@ shared/   catalogue d'apps (shared/apps.ts) + types de l'API
 
 - `GET /api/dashboard` regroupe toutes les sources. Chaque source est en cache côté serveur (Vikunja 30 s, Sure 5 min, autres 60 s). Une source en erreur n'affecte que son widget.
 - `POST /api/tasks` (création dans l'Inbox Vikunja, échéance aujourd'hui 18h) et `POST /api/tasks/:id/done`.
+- `GET/PUT /api/prefs` : raccourcis épinglés, stockés côté serveur pour être identiques sur tous les navigateurs.
 - Les tokens des services restent côté serveur ; le navigateur n'a qu'un cookie de session `HttpOnly; SameSite=Strict`.
 
 ## Connexion
@@ -22,11 +25,12 @@ Passkey (WebAuthn, identifiants découvrables) et session de 400 jours renouvel�
 2. Autres appareils : les passkeys synchronisées (Google, iCloud, Bitwarden) fonctionnent directement ; sinon, Réglages → « Ajouter une passkey » depuis un appareil déjà connecté, ou connexion par QR code.
 3. Réglages : liste et suppression des passkeys (ce qui coupe leurs sessions), déconnexion des autres appareils.
 
-## Raccourcis
+## Utilisation
 
-- Taper n'importe où pour chercher dans le lanceur. `↑/↓` ou `Tab` pour naviguer, `Entrée` pour ouvrir, `Ctrl+Entrée` pour un nouvel onglet.
-- Si la saisie ressemble à un domaine, il est ouvert directement ; sinon c'est une recherche Google.
-- Icône œil sur le widget dépenses : masque les montants (flou, visible au survol).
+- **Raccourcis** : « + » ouvre le tiroir en mode choix (toucher une app l'ajoute ou la retire). Dans le tiroir, le crayon passe en mode édition : glisser pour réordonner, × pour retirer.
+- **Tiroir d'apps** : icône grille en haut à droite.
+- **Recherche** : taper n'importe où sur la page. `↑/↓` ou `Tab` pour naviguer, `Entrée` pour ouvrir, `Ctrl+Entrée` pour un nouvel onglet. Une adresse est ouverte directement ; sinon c'est une recherche Google.
+- **Tuiles** : cliquer pour voir le détail (toutes les tâches avec ajout rapide, catégories et opérations du budget, onglets Gitea, ressources Coolify et disponibilité des apps). L'œil de la tuile budget masque les montants.
 
 ## Ajouter une app
 

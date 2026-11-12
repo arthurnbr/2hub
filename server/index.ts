@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { secureHeaders } from "hono/secure-headers";
 import { z } from "zod";
-import type { Dashboard, Section } from "../shared/types";
+import { ALL_APPS, DEFAULT_PINNED } from "../shared/apps";
+import type { Dashboard, Prefs, Section } from "../shared/types";
+import { db } from "./db";
 import { auth, requireAuth, sameOrigin, session } from "./auth";
 import { env } from "./env";
 import { cached } from "./http";
@@ -84,6 +86,28 @@ api.post("/tasks", requireAuth, async (c) => {
   await createTask(body.data.title, body.data.today);
   sources.tasks.invalidate();
   return c.json({ ok: true });
+});
+
+const PINNED_KEY = "pinned";
+const PinnedBody = z.object({ pinned: z.array(z.string().max(64)).max(24) });
+const pinnedQuery = db.query<{ value: string }, [string]>("SELECT value FROM prefs WHERE key = ?");
+
+api.get("/prefs", requireAuth, (c) => {
+  const row = pinnedQuery.get(PINNED_KEY);
+  const prefs: Prefs = { pinned: row ? PinnedBody.shape.pinned.parse(JSON.parse(row.value)) : DEFAULT_PINNED };
+  return c.json(prefs);
+});
+
+api.put("/prefs", requireAuth, async (c) => {
+  const body = PinnedBody.safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: "bad request" }, 400);
+  const known = body.data.pinned.filter((id) => ALL_APPS.some((a) => a.id === id));
+  db.query("INSERT INTO prefs (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(
+    PINNED_KEY,
+    JSON.stringify(known),
+  );
+  const prefs: Prefs = { pinned: known };
+  return c.json(prefs);
 });
 
 api.onError((e, c) => {

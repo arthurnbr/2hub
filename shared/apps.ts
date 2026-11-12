@@ -61,3 +61,6 @@ export const APP_GROUPS: AppGroup[] = [
 ];
 
 export const ALL_APPS: App[] = APP_GROUPS.flatMap((g) => g.apps);
+
+/** Shortcut row shown until the user customises it. */
+export const DEFAULT_PINNED = ["todo", "finance", "gitea", "eduvia-hub", "mail", "drive", "erp", "coolify"];

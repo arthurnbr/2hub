@@ -106,3 +106,6 @@ export type Dashboard = {
 export type AuthState = { authenticated: boolean; hasPasskeys: boolean };
 
 export type Passkey = { id: string; name: string; createdAt: string; lastUsedAt: string | null; current: boolean };
+
+/** User preferences stored server-side so every browser shows the same shortcuts. */
+export type Prefs = { pinned: string[] };

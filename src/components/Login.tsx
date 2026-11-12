@@ -18,7 +18,7 @@ export function Login({ hasPasskeys, onDone }: { hasPasskeys: boolean; onDone: (
       onDone();
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setError(/NotAllowed|abort|timed out/i.test(msg) ? "Annulé." : msg);
+      setError(/NotAllowed|abort|timed out/i.test(msg) ? "Connexion annulée. Réessaie quand tu es prêt." : msg);
     } finally {
       setBusy(false);
     }
@@ -26,34 +26,37 @@ export function Login({ hasPasskeys, onDone }: { hasPasskeys: boolean; onDone: (
 
   return (
     <main class="login">
-      <div class="aurora" />
-      <div class="grain" />
       <div class="login-card">
-        <div class="logo">
-          <LayoutGrid size={30} />
-        </div>
-        <h1>2hub</h1>
+        <span class="login-mark">
+          <LayoutGrid size={24} />
+        </span>
+        <h1>{hasPasskeys ? "Connexion à 2hub" : "Configurer 2hub"}</h1>
         {hasPasskeys ? (
           <>
-            <p>Déverrouille ton hub avec ta passkey.</p>
-            <button class="btn btn-primary" disabled={busy} onClick={() => run(api.login)} autoFocus>
-              <FingerprintPattern size={20} />
-              {busy ? "En attente…" : "Se connecter"}
+            <p>Utilise la passkey de cet appareil.</p>
+            <button class="btn filled block" disabled={busy} onClick={() => run(api.login)} autoFocus>
+              <FingerprintPattern size={18} />
+              {busy ? "En attente de la passkey…" : "Se connecter"}
             </button>
           </>
         ) : (
           <form
+            class="fields"
             onSubmit={(e) => {
               e.preventDefault();
               run(() => api.register(name || "Premier appareil", token));
             }}
           >
-            <p>Première configuration : crée la passkey de cet appareil.</p>
-            <input class="field" type="password" placeholder="Jeton de setup (BOOTSTRAP_TOKEN)" value={token} onInput={(e) => setToken(e.currentTarget.value)} required />
-            <input class="field" placeholder="Nom de l'appareil (ex. PC fixe)" value={name} onInput={(e) => setName(e.currentTarget.value)} />
-            <button class="btn btn-primary" disabled={busy} type="submit">
-              <FingerprintPattern size={20} />
-              {busy ? "En attente…" : "Créer ma passkey"}
+            <p>Crée la passkey de cet appareil. Le jeton de configuration se trouve dans ~/.secrets/hub.env.</p>
+            <label class="text-field">
+              <input type="password" placeholder="Jeton de configuration" value={token} onInput={(e) => setToken(e.currentTarget.value)} required />
+            </label>
+            <label class="text-field">
+              <input placeholder="Nom de l'appareil, ex. PC fixe" value={name} onInput={(e) => setName(e.currentTarget.value)} />
+            </label>
+            <button class="btn filled block" disabled={busy} type="submit">
+              <FingerprintPattern size={18} />
+              {busy ? "En attente de la passkey…" : "Créer la passkey"}
             </button>
           </form>
         )}
