@@ -1,0 +1,28 @@
+{
+  "name": "2hub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "bun --watch server/index.ts",
+    "build": "vite build",
+    "start": "bun server/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^14.1.0",
+    "hono": "^4.13.18",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@preact/preset-vite": "^2.10.6",
+    "@simplewebauthn/browser": "^14.0.0",
+    "@types/bun": "^1.4.4",
+    "lucide-preact": "^1.72.0",
+    "preact": "^11.2.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}
